@@ -3,7 +3,7 @@
 **Mediahater** is a lightweight, extensible messaging pipeline for .NET developers 
 — built to give you full control over request/response dispatching, fire-and-forget notifications, and middleware composition.
 
-After releasing [SwizzleV](https://github.com/mshimshon/SwizzleV), [StatePulse](https://github.com/mshimshon/StatePulse.Net), and [CoreMap](https://github.com/mshimshon/CoreMap), 
+After releasing [SwizzleV](https://github.com/mshimshon/SwizzleV), [StatePulse.NET](https://github.com/mshimshon/StatePulse.Net), and [CoreMap](https://github.com/mshimshon/CoreMap), 
 it felt natural to close my release spree with a **clearly Licensed,  MediatR alternative**.
 
 No janky license games. No lock-in. No dependency baggage.
