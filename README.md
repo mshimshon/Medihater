@@ -42,10 +42,8 @@ There are already well-known mediator packages out there — some powerful, some
 
 But here's the thing:
 
-> After releasing tools like **SwizzleV**, **StatePulse**, and **CoreMap**, it felt right to round off the stack with a clean, reliable messaging system — one where I know for certain:
+> It felt right to round off the stack with a clean, reliable messaging system — one thing I know for certain:
 
-> - The license won't suddenly change
-> - No surprise "freemium" features
 > - No team lead tapping me on the shoulder saying:  
 >   *“Hey... this package isn't free anymore. We need to stop updating or start migrating.”*
 
