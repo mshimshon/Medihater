@@ -44,8 +44,8 @@ But here's the thing:
 
 > It felt right to round off the stack with a clean, reliable messaging system — one thing I know for certain:
 
-> - No team lead tapping me on the shoulder saying:  
->   *“Hey... this package isn't free anymore. We need to stop updating or start migrating.”*
+>There will be none of team lead tapping me on the shoulder saying:
+>*“Hey... this package isn't free anymore. We need to stop updating or start migrating.”*
 
 That’s the entire point of **Mediahater**.
 
