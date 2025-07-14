@@ -33,7 +33,6 @@ Some packages start simple, but over time get tangled in fuzzy licensing, dual-l
 - **Transparent** — MIT now, MIT forever
 - **Simple** — One purpose: in-process message handling
 - **Composable** — Extend it, wrap it, or replace parts easily
-- **Stable** — Built with real production architectures in mind
 
 If you're already using SwizzleV, StatePulse, or CoreMap, this fits right in — a natural continuation for CQRS-like pipelines.
 
