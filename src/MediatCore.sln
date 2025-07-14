@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediHater", "MediHater\MediHater.csproj", "{FEC5085B-7097-B32C-5EC4-F4644367E4B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediHater.Tests", "..\tests\MediHater.Tests\MediHater.Tests.csproj", "{5B3C38A9-AA0A-5A2F-A7EF-14F2752FB487}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FEC5085B-7097-B32C-5EC4-F4644367E4B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEC5085B-7097-B32C-5EC4-F4644367E4B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEC5085B-7097-B32C-5EC4-F4644367E4B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEC5085B-7097-B32C-5EC4-F4644367E4B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B3C38A9-AA0A-5A2F-A7EF-14F2752FB487}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B3C38A9-AA0A-5A2F-A7EF-14F2752FB487}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B3C38A9-AA0A-5A2F-A7EF-14F2752FB487}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B3C38A9-AA0A-5A2F-A7EF-14F2752FB487}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {95A1A56C-3543-4738-AD0F-3BE97EB62D1F}
+	EndGlobalSection
+EndGlobal
