@@ -85,10 +85,11 @@ public static class RegisterServicesExt
 
     private static IServiceCollection TryRegisterRequestHandlers(this IServiceCollection services, Type iFace, Type implementation)
     {
-        if (
-            iFace.IsGenericType && iFace.GetGenericTypeDefinition() == _requestHandlerType || iFace == _requestHandlerVoidType &&
-            !services.IsServiceInterfaceRegistered(iFace)
-             )
+        bool isGenericAndDefinitionRequestType = iFace.IsGenericType && (iFace.GetGenericTypeDefinition() == _requestHandlerType || iFace.GetGenericTypeDefinition() == _requestHandlerVoidType);
+        bool isNonGenericAndRequestType = !iFace.IsGenericType && (iFace == _requestHandlerType || iFace == _requestHandlerVoidType);
+        bool shouldRegister = (isGenericAndDefinitionRequestType || isNonGenericAndRequestType) &&
+            !services.IsServiceInterfaceRegistered(iFace);
+        if (shouldRegister)
             services.AddTransient(iFace, implementation);
         return services;
     }

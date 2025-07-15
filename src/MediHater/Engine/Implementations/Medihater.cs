@@ -62,10 +62,21 @@ internal class Medihater : IMedihater
 
     public async Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
-        var handlerType = MediahaterCacher.GetHandlerOrCache(request.GetType(), typeof(TResponse));
+        var requestType = request.GetType();
+        var responseType = typeof(TResponse);
+        var handlerType = MediahaterCacher.GetHandlerOrCache(requestType, responseType);
         var handler = _serviceProvider.GetRequiredService(handlerType);
-        var handle = MediahaterCacher.GetMethodOrCache(handlerType);
-        return (TResponse)await handle(handler, request, cancellationToken);
+        var handle = MediahaterCacher.GetMethodOrCache(requestType, responseType, handlerType);
+        var response = await handle(handler, request, cancellationToken);
+        return (TResponse)response;
+    }
+    public async Task Send(IRequest request, CancellationToken cancellationToken = default)
+    {
+        var requestType = request.GetType();
+        var handlerType = MediahaterCacher.GetVoidHandlerOrCache(requestType);
+        var handler = _serviceProvider.GetRequiredService(handlerType);
+        var handle = MediahaterCacher.GetVoidMethodOrCache(requestType, handlerType);
+        await handle(handler, request, cancellationToken);
     }
     public async Task<object?> Send(object request, CancellationToken cancellationToken = default)
     {
@@ -92,29 +103,14 @@ internal class Medihater : IMedihater
         {
             // Get TResponse
             var responseType = irequestInterface.GetGenericArguments()[0];
-
-            // Call: Send<TResponse>((IRequest<TResponse>)request, cancellationToken)
-            var sendGenericMethod = typeof(Medihater)
-                .GetMethod(nameof(Send), new[] { irequestInterface, typeof(CancellationToken) });
-
-            var generic = sendGenericMethod!.MakeGenericMethod(responseType);
-
-            var handlerTask = (Task)generic.Invoke(this, new object[] { request, cancellationToken })!;
-            await handlerTask.ConfigureAwait(false);
-
-            // Get result
-            var resultProperty = handlerTask.GetType().GetProperty("Result");
-            return resultProperty?.GetValue(handlerTask);
+            var handlerType = MediahaterCacher.GetHandlerOrCache(requestType, responseType);
+            var handler = _serviceProvider.GetRequiredService(handlerType);
+            var handle = MediahaterCacher.GetMethodOrCache(requestType, responseType, handlerType);
+            return await handle(handler, request, cancellationToken);
         }
-
-
     }
 
-    public async Task Send(IRequest request, CancellationToken cancellationToken = default)
-    {
-        var handler = _serviceProvider.GetRequiredService<IRequestHandler<IRequest>>();
-        await handler.Handle(request, cancellationToken);
-    }
+
 
 
 
