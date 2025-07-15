@@ -6,7 +6,7 @@
 After releasing [SwizzleV](https://github.com/mshimshon/SwizzleV), [StatePulse.NET](https://github.com/mshimshon/StatePulse.Net), and [CoreMap](https://github.com/mshimshon/CoreMap), 
 it felt natural to close my release spree with a **clearly Licensed,  MediatR alternative**.
 
-No janky license games. No lock-in. No dependency baggage.
+No janky license games & No lock-in.
 
 Just a sharp tool under the **forever MIT License**.
 
