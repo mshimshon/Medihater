@@ -10,6 +10,8 @@ static class MediahaterCacher
 {
     private static readonly ConcurrentDictionary<Type, Type> _requestToHandler = new();
     private static readonly ConcurrentDictionary<Type, Type> _requestVoidToHandler = new();
+    private static readonly ConcurrentDictionary<Type, Type> _notificationToHandler = new();
+    private static readonly ConcurrentDictionary<Type, VoidInvoker> _notificationCache = new();
     public static Type GetHandlerOrCache(Type requestType, Type responseType)
     {
         return _requestToHandler.GetOrAdd(requestType, typeof(IRequestHandler<,>).MakeGenericType(requestType, responseType));
@@ -20,6 +22,53 @@ static class MediahaterCacher
         return _requestVoidToHandler.GetOrAdd(requestType, typeof(IRequestHandler<>).MakeGenericType(requestType));
     }
 
+    public static Type GetNotificationHandlerOrCache(Type requestType)
+    {
+        return _notificationToHandler.GetOrAdd(requestType, typeof(IRequestHandler<>).MakeGenericType(requestType));
+    }
+    public static ResponseInvoker GetLegacyMethodOrCache(Type requestType, Type responseType, Type handlerType)
+    {
+
+        var methodName = nameof(IRequestHandler<IRequest<object>, object>.Handle);
+        var handleMethod = handlerType.GetMethod(methodName)!;
+
+        return async (handler, request, ct) =>
+        {
+            var task = (Task)handleMethod.Invoke(handler, new[] { request, ct })!;
+            await task.ConfigureAwait(false);
+
+            if (responseType == typeof(void))
+                return null!;
+
+            var resultProperty = task.GetType().GetProperty("Result");
+            var result = resultProperty?.GetValue(task);
+            return result!;
+        };
+    }
+
+    public static VoidInvoker GetLegacyVoidMethodOrCache(Type requestType, Type handlerType)
+    {
+        var methodName = nameof(IRequestHandler<IRequest>.Handle);
+        var handleMethod = handlerType.GetMethod(methodName);
+
+        return (handler, request, ct) =>
+        {
+            var task = (Task)handleMethod!.Invoke(handler, new[] { request, ct })!;
+            return task;
+        };
+    }
+    public static VoidInvoker GetLegacyNotificationMethodOrCache(Type notificationType, Type handlerType)
+    {
+
+        var methodName = nameof(INotificationHandler<INotification>.Handle);
+        var handleMethod = handlerType.GetMethod(methodName);
+
+        return (handler, request, ct) =>
+        {
+            var task = (Task)handleMethod!.Invoke(handler, new[] { request, ct })!;
+            return task;
+        };
+    }
 #if NET6_0_OR_GREATER
     private static readonly ConcurrentDictionary<Type, ResponseInvoker> _responseCache = new();
     private static readonly ConcurrentDictionary<Type, VoidInvoker> _voidCache = new();
@@ -34,7 +83,6 @@ static class MediahaterCacher
     {
         return _voidCache.GetOrAdd(handlerType, CreateVoidInvoker(requestType, handlerType));
     }
-
     private static ResponseInvoker CreateResponseInvoker(Type requestType, Type responseType, Type handlerType)
     {
         var methodName = nameof(IRequestHandler<IRequest<object>, object>.Handle);
@@ -115,40 +163,22 @@ static class MediahaterCacher
 
         return (VoidInvoker)dm.CreateDelegate(typeof(VoidInvoker));
     }
-#else
-    public static ResponseInvoker GetMethodOrCache(Type requestType, Type responseType, Type handlerType)
+    public static VoidInvoker GetNotificationMethodOrCache(Type notificationType, Type handlerType)
     {
-
-        var methodName = nameof(IRequestHandler<IRequest<object>, object>.Handle);
-        var handleMethod = handlerType.GetMethod(methodName)!;
-
-        return async (handler, request, ct) =>
-        {
-            var task = (Task)handleMethod.Invoke(handler, new[] { request, ct })!;
-            await task.ConfigureAwait(false);
-
-            if (responseType == typeof(void))
-                return null!;
-
-            var resultProperty = task.GetType().GetProperty("Result");
-            var result = resultProperty?.GetValue(task);
-            return result!;
-        };
+        return _notificationCache.GetOrAdd(handlerType, CreateVoidInvoker(notificationType, handlerType));
     }
+
+
+#else
+     public static ResponseInvoker GetMethodOrCache(Type requestType, Type responseType, Type handlerType)
+        => GetLegacyMethodOrCache(requestType, responseType, handlerType);
 
     public static VoidInvoker GetVoidMethodOrCache(Type requestType, Type handlerType)
-    {
-        var interfaceType = handlerType.GetInterfaces()
-            .First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequestHandler<>));
-        var methodName = nameof(IRequestHandler<IRequest>.Handle);
-        var handleMethod = interfaceType.GetMethod(methodName);
+        => GetLegacyVoidMethodOrCache(requestType, handlerType);
 
-        return (handler, request, ct) =>
-        {
-            var task = (Task)handleMethod!.Invoke(handler, new[] { request, ct })!;
-            return task;
-        };
-    }
+    public static VoidInvoker GetNotificationMethodOrCache(Type notificationType, Type handlerType)
+            => GetLegacyNotificationMethodOrCache(notificationType, handlerType);
+
 #endif
 }
 

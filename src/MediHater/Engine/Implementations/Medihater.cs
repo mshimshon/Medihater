@@ -110,19 +110,21 @@ internal class Medihater : IMedihater
         }
     }
 
-
-
-
-
     private Task PublishHandler<TNotification>(TNotification notification, INotificationHandler<TNotification> handler, CancellationToken cancellationToken = default)
      where TNotification : INotification
     {
         var handlerType = handler.GetType();
         try
         {
-            var task = handler.Handle(notification, cancellationToken);
+            var notificationType = notification.GetType();
+            var handlerIfaceType = MediahaterCacher.GetNotificationHandlerOrCache(notificationType);
+            var handlerObj = _serviceProvider.GetRequiredService(handlerType);
+            var handle = MediahaterCacher.GetNotificationMethodOrCache(notificationType, handlerIfaceType);
+
+
+            var task = handle(handlerObj, notificationType, cancellationToken);
             _ = _publisherMiddlewares.Select(p => p.WhenPublishSucceed(notification, handlerType, cancellationToken));
-            return task;
+            return task!;
         }
         catch (Exception ex)
         {

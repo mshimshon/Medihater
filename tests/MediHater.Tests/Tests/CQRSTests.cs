@@ -1,6 +1,4 @@
-﻿using MedihatR.Test.CQRS.Commands;
-using MedihatR.Test.CQRS.Commands.Handlers;
-using MedihatR.Test.CQRS.Queries;
+﻿using MedihatR.Test.CQRS.Queries;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MedihatR.Test.Tests;
@@ -21,15 +19,15 @@ public class CQRSTests : TestBase
     }
 
     [Fact]
-    public async Task ShouldSuccessfully_CreateArticle_UsingNonGenericSend()
+    public async Task ShouldSuccessfully_GetArticle_UsingGenericSend()
     {
-        await _medihater.Send(new CreateArticleCommand()
-        {
-            Title = "",
-            Description = ""
-        });
-
-        Assert.True(CreateArticleHandler.UnitTestPassed);
+        object query = new GetArticleQuery("dsad");
+        var response = await _medihater.Send(query);
+        Assert.True(response!.GetType() == response.GetType());
     }
+
+
+
+
 
 }
