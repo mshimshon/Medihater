@@ -62,9 +62,10 @@ internal class Medihater : IMedihater
 
     public async Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
-        var handler =
-            _serviceProvider.GetRequiredService<IRequestHandler<IRequest<TResponse>, TResponse>>();
-        return await handler.Handle(request, cancellationToken);
+        var handlerType = MediahaterCacher.GetHandlerOrCache(request.GetType(), typeof(TResponse));
+        var handler = _serviceProvider.GetRequiredService(handlerType);
+        var handle = MediahaterCacher.GetMethodOrCache(handlerType);
+        return (TResponse)await handle(handler, request, cancellationToken);
     }
     public async Task<object?> Send(object request, CancellationToken cancellationToken = default)
     {

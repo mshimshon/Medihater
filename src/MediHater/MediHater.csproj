@@ -15,10 +15,21 @@
 	  <Copyright>Maksim Shimshon © 2025</Copyright>
 	  <PackageProjectUrl>https://github.com/mshimshon/MediatCore</PackageProjectUrl>
 	  <RepositoryUrl>https://github.com/mshimshon/MediatCore</RepositoryUrl>
-	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <PackageReadmeFile>RELEASES.md</PackageReadmeFile>
 	  <Version>0.9.0</Version>
 	  <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\..\RELEASES.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6" />

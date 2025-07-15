@@ -5,25 +5,23 @@ namespace MedihatR;
 public static class RegisterServicesExt
 {
     private static bool _scanned;
-    private static Type _requestVoidType = typeof(IRequest);
+
     private static Type _requestHandlerVoidType = typeof(IRequestHandler<>);
-
-    private static Type _requestType = typeof(IRequest<>);
     private static Type _requestHandlerType = typeof(IRequestHandler<,>);
-
-    private static Type _notificationType = typeof(INotification);
     private static Type _notificationHandlerType = typeof(INotificationHandler<>);
     public static MedihaterConfiguration Configuration { get; private set; } = new MedihaterConfiguration();
-    public static IServiceCollection AddMediatCoreServices(this IServiceCollection services, Action<MedihaterConfiguration>? configure = default)
+    public static IServiceCollection AddMedihaterServices(this IServiceCollection services, Action<MedihaterConfiguration>? configure = default)
     {
         if (configure != default)
             configure(Configuration);
 
-        if (Configuration.AssembliesScan.Count() > 0)
+        if (Configuration.AssembliesScan.Any())
             services.ScanAssemblies(Configuration.AssembliesScan.ToArray());
+
         services.AddScoped<IMedihater, Medihater>();
         return services;
     }
+
     private static void ScanAssemblies(this IServiceCollection services, params Type[] assemblies)
     {
         if (_scanned) return;
@@ -40,6 +38,39 @@ public static class RegisterServicesExt
                     .TryRegisterNotificationHandlers(iface, type)
                     .TryRegisterRequestHandlers(iface, type);
         }
+    }
+    public static IServiceCollection AddMedihaterRequestHandler<TRequest, THandler, TResult>(this IServiceCollection services)
+        where TRequest : IRequest<TResult>
+        where THandler : IRequestHandler<TRequest, TResult>
+    {
+        Type impleType = typeof(THandler);
+        Type requestType = typeof(TRequest);
+        Type tResultType = typeof(TResult);
+        Type iface = _requestHandlerType.MakeGenericType(requestType, tResultType);
+        services.TryRegisterRequestHandlers(iface, impleType);
+        return services;
+
+    }
+    public static IServiceCollection AddMedihaterRequestHandler<TRequest, THandler>(this IServiceCollection services)
+        where TRequest : IRequest
+        where THandler : IRequestHandler<TRequest>
+    {
+        Type impleType = typeof(THandler);
+        Type requestType = typeof(TRequest);
+        Type iface = _requestHandlerVoidType.MakeGenericType(requestType);
+        services.TryRegisterRequestHandlers(iface, impleType);
+        return services;
+    }
+    public static IServiceCollection AddMedihaterNotificationHandler<TNotification, THandler>(this IServiceCollection services)
+        where TNotification : INotification
+        where THandler : INotificationHandler<TNotification>
+    {
+        Type impleType = typeof(THandler);
+        Type notificationType = typeof(TNotification);
+        Type iface = _requestHandlerType.MakeGenericType(notificationType);
+        services.TryRegisterRequestHandlers(iface, impleType);
+        return services;
+
     }
 
     private static IServiceCollection TryRegisterNotificationHandlers(this IServiceCollection services, Type iFace, Type implementation)
