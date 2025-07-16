@@ -67,8 +67,8 @@ public static class RegisterServicesExt
     {
         Type impleType = typeof(THandler);
         Type notificationType = typeof(TNotification);
-        Type iface = _requestHandlerType.MakeGenericType(notificationType);
-        services.TryRegisterRequestHandlers(iface, impleType);
+        Type iface = _notificationHandlerType.MakeGenericType(notificationType);
+        services.TryRegisterNotificationHandlers(iface, impleType);
         return services;
 
     }

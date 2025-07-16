@@ -19,16 +19,18 @@ internal class Medihater : IMedihater
     public async Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
            where TNotification : INotification
     {
-        var services = _serviceProvider.GetServices<INotificationHandler<TNotification>>();
+        var notificationType = notification.GetType();
+        var handlerIfaceType = MediahaterCacher.GetNotificationHandlerOrCache(notificationType);
+        var services = _serviceProvider.GetServices(handlerIfaceType);
         var beforeTasks = new List<Task>();
         var tasks = new Dictionary<Type, Task>();
         foreach (var handler in services)
         {
-            var handlerType = handler.GetType();
+            var handlerType = handler!.GetType();
 
             var beforePublish = _publisherMiddlewares.Select(p => p.BeforePublish(notification, handlerType, cancellationToken));
             beforeTasks.AddRange(beforePublish);
-            tasks[handlerType] = PublishHandler(notification, handler, cancellationToken);
+            tasks[handlerType] = PublishHandler(notification, handler, handlerType, cancellationToken);
         }
         await Task.WhenAll(tasks.Values);
         await Task.WhenAll(beforeTasks);
@@ -110,19 +112,18 @@ internal class Medihater : IMedihater
         }
     }
 
-    private Task PublishHandler<TNotification>(TNotification notification, INotificationHandler<TNotification> handler, CancellationToken cancellationToken = default)
+    private Task PublishHandler<TNotification>(TNotification notification, object handlerObj, Type handlerType, CancellationToken cancellationToken = default)
      where TNotification : INotification
     {
-        var handlerType = handler.GetType();
         try
         {
             var notificationType = notification.GetType();
             var handlerIfaceType = MediahaterCacher.GetNotificationHandlerOrCache(notificationType);
-            var handlerObj = _serviceProvider.GetRequiredService(handlerType);
+
             var handle = MediahaterCacher.GetNotificationMethodOrCache(notificationType, handlerIfaceType);
 
 
-            var task = handle(handlerObj, notificationType, cancellationToken);
+            var task = handle(handlerObj, notification, cancellationToken);
             _ = _publisherMiddlewares.Select(p => p.WhenPublishSucceed(notification, handlerType, cancellationToken));
             return task!;
         }

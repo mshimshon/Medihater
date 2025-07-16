@@ -22,9 +22,9 @@ static class MediahaterCacher
         return _requestVoidToHandler.GetOrAdd(requestType, typeof(IRequestHandler<>).MakeGenericType(requestType));
     }
 
-    public static Type GetNotificationHandlerOrCache(Type requestType)
+    public static Type GetNotificationHandlerOrCache(Type notificationType)
     {
-        return _notificationToHandler.GetOrAdd(requestType, typeof(IRequestHandler<>).MakeGenericType(requestType));
+        return _notificationToHandler.GetOrAdd(notificationType, typeof(INotificationHandler<>).MakeGenericType(notificationType));
     }
     public static ResponseInvoker GetLegacyMethodOrCache(Type requestType, Type responseType, Type handlerType)
     {
@@ -81,7 +81,9 @@ static class MediahaterCacher
 
     public static VoidInvoker GetVoidMethodOrCache(Type requestType, Type handlerType)
     {
-        return _voidCache.GetOrAdd(handlerType, CreateVoidInvoker(requestType, handlerType));
+        var methodName = nameof(IRequestHandler<IRequest<object>>.Handle);
+
+        return _voidCache.GetOrAdd(handlerType, CreateVoidInvoker(requestType, handlerType, methodName));
     }
     private static ResponseInvoker CreateResponseInvoker(Type requestType, Type responseType, Type handlerType)
     {
@@ -129,9 +131,8 @@ static class MediahaterCacher
     {
         return (await task.ConfigureAwait(false))!;
     }
-    private static VoidInvoker CreateVoidInvoker(Type requestType, Type handlerType)
+    private static VoidInvoker CreateVoidInvoker(Type requestType, Type handlerType, string methodName)
     {
-        var methodName = nameof(IRequestHandler<IRequest<object>>.Handle);
         var handleMethod = handlerType.GetMethod(methodName, new[] { requestType, typeof(CancellationToken) })!;
 
         // Dynamic method signature:
@@ -165,7 +166,9 @@ static class MediahaterCacher
     }
     public static VoidInvoker GetNotificationMethodOrCache(Type notificationType, Type handlerType)
     {
-        return _notificationCache.GetOrAdd(handlerType, CreateVoidInvoker(notificationType, handlerType));
+        var methodName = nameof(INotificationHandler<INotification>.Handle);
+
+        return _notificationCache.GetOrAdd(handlerType, CreateVoidInvoker(notificationType, handlerType, methodName));
     }
 
 
