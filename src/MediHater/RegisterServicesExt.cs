@@ -1,4 +1,5 @@
-﻿using MedihatR.Engine.Implementations;
+﻿using MedihatR.Configuraions;
+using MedihatR.Engine.Implementations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MedihatR;

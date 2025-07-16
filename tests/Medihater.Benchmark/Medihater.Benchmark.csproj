@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+<PropertyGroup>
+	<PlatformTarget>AnyCPU</PlatformTarget>
+	<DebugType>portable</DebugType>
+	<DebugSymbols>true</DebugSymbols>
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<Optimize>true</Optimize>
+	<Configuration>Release</Configuration>
+</PropertyGroup>
+<ItemGroup>
+  <PackageReference Include="BenchmarkDotNet" Version="0.15.2" />
+  <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.15.2" />
+  <PackageReference Include="MediatR" Version="13.0.0" />
+</ItemGroup>
+<ItemGroup>
+  <ProjectReference Include="..\..\src\MediHater\MediHater.csproj" />
+</ItemGroup>
+</Project>

@@ -25,9 +25,4 @@ public class CQRSTests : TestBase
         var response = await _medihater.Send(query);
         Assert.True(response!.GetType() == response.GetType());
     }
-
-
-
-
-
 }
