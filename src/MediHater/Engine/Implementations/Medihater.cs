@@ -18,6 +18,8 @@ internal class Medihater : IMedihater
 
     public async Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
            where TNotification : INotification
+    => await Publish((object)notification, cancellationToken);
+    public async Task Publish(object notification, CancellationToken cancellationToken = default)
     {
         var notificationType = notification.GetType();
         var handlerIfaceType = MediahaterCacher.GetNotificationHandlerOrCache(notificationType);
@@ -37,29 +39,28 @@ internal class Medihater : IMedihater
 
         var postPublish = tasks.Keys.SelectMany(t => _publisherMiddlewares.Select(p => p.AfterPublish(notification, t, cancellationToken)));
         await Task.WhenAll(postPublish);
-
     }
-
-    public async Task Publish(object notification, CancellationToken cancellationToken = default)
+    private Task PublishHandler(object notification, object handlerObj, Type handlerType, CancellationToken cancellationToken = default)
     {
-        if (notification == null)
-            throw new ArgumentNullException(nameof(notification));
-        var notificationType = notification.GetType();
-        if (!typeof(INotification).IsAssignableFrom(notificationType))
-            throw new ArgumentException($"Object does not implement INotification: {notificationType}");
-        var genericPublishMethod = typeof(Medihater)
-            .GetMethod(nameof(Publish), new[] { notificationType, typeof(CancellationToken) });
-        if (genericPublishMethod == null || !genericPublishMethod.IsGenericMethodDefinition)
+        try
         {
-            genericPublishMethod = typeof(Medihater)
-                .GetMethods()
-                .First(m => m.Name == nameof(Publish)
-                         && m.IsGenericMethodDefinition
-                         && m.GetParameters().Length == 2);
+            var notificationType = notification.GetType();
+            var handlerIfaceType = MediahaterCacher.GetNotificationHandlerOrCache(notificationType);
+            VoidInvoker handle;
+            if (RegisterServicesExt.Configuration.Performance == Configuraions.Enums.PipelinePerformance.DynamicMethods)
+                handle = MediahaterCacher.GetLegacyNotificationMethodOrCache(notificationType, handlerIfaceType);
+            else
+                handle = MediahaterCacher.GetNotificationMethodOrCache(notificationType, handlerIfaceType);
+
+            var task = handle(handlerObj, notification, cancellationToken);
+            _ = _publisherMiddlewares.Select(p => p.WhenPublishSucceed(notification, handlerType, cancellationToken));
+            return task!;
         }
-        var method = genericPublishMethod.MakeGenericMethod(notificationType);
-        var task = (Task)method.Invoke(this, new object[] { notification, cancellationToken })!;
-        await task.ConfigureAwait(false);
+        catch (Exception ex)
+        {
+            _ = _publisherMiddlewares.Select(p => p.WhenPublishFailed(notification, handlerType, cancellationToken));
+            throw new PublishFailureException(handlerType, ex.Message);
+        }
     }
 
     public async Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
@@ -77,7 +78,12 @@ internal class Medihater : IMedihater
         var requestType = request.GetType();
         var handlerType = MediahaterCacher.GetVoidHandlerOrCache(requestType);
         var handler = _serviceProvider.GetRequiredService(handlerType);
-        var handle = MediahaterCacher.GetVoidMethodOrCache(requestType, handlerType);
+        VoidInvoker handle;
+        if (RegisterServicesExt.Configuration.Performance == Configuraions.Enums.PipelinePerformance.DynamicMethods)
+            handle = MediahaterCacher.GetVoidMethodOrCache(requestType, handlerType);
+        else
+            handle = MediahaterCacher.GetLegacyVoidMethodOrCache(requestType, handlerType);
+
         await handle(handler, request, cancellationToken);
     }
     public async Task<object?> Send(object request, CancellationToken cancellationToken = default)
@@ -92,13 +98,17 @@ internal class Medihater : IMedihater
 
         if (irequestInterface == null)
         {
-            if (!typeof(IRequest).IsAssignableFrom(requestType))
-                throw new ArgumentException("Request does not implement IRequest or IRequest<TResponse>");
-            var sendVoidMethod = typeof(Medihater)
-                .GetMethod(nameof(Send), new[] { typeof(IRequest), typeof(CancellationToken) });
 
-            var handlerTask = (Task)sendVoidMethod!.Invoke(this, new object[] { request, cancellationToken })!;
-            await handlerTask.ConfigureAwait(false);
+            var handlerType = MediahaterCacher.GetVoidHandlerOrCache(requestType);
+            var handler = _serviceProvider.GetRequiredService(handlerType);
+            VoidInvoker handle;
+            if (RegisterServicesExt.Configuration.Performance == Configuraions.Enums.PipelinePerformance.DynamicMethods)
+                handle = MediahaterCacher.GetVoidMethodOrCache(requestType, handlerType);
+            else
+                handle = MediahaterCacher.GetLegacyVoidMethodOrCache(requestType, handlerType);
+
+            await handle(handler, request, cancellationToken);
+
             return null;
         }
         else
@@ -107,30 +117,13 @@ internal class Medihater : IMedihater
             var responseType = irequestInterface.GetGenericArguments()[0];
             var handlerType = MediahaterCacher.GetHandlerOrCache(requestType, responseType);
             var handler = _serviceProvider.GetRequiredService(handlerType);
-            var handle = MediahaterCacher.GetMethodOrCache(requestType, responseType, handlerType);
+            ResponseInvoker handle;
+            if (RegisterServicesExt.Configuration.Performance == Configuraions.Enums.PipelinePerformance.DynamicMethods)
+                handle = MediahaterCacher.GetMethodOrCache(requestType, responseType, handlerType);
+            else
+                handle = MediahaterCacher.GetLegacyMethodOrCache(requestType, responseType, handlerType);
+
             return await handle(handler, request, cancellationToken);
-        }
-    }
-
-    private Task PublishHandler<TNotification>(TNotification notification, object handlerObj, Type handlerType, CancellationToken cancellationToken = default)
-     where TNotification : INotification
-    {
-        try
-        {
-            var notificationType = notification.GetType();
-            var handlerIfaceType = MediahaterCacher.GetNotificationHandlerOrCache(notificationType);
-
-            var handle = MediahaterCacher.GetNotificationMethodOrCache(notificationType, handlerIfaceType);
-
-
-            var task = handle(handlerObj, notification, cancellationToken);
-            _ = _publisherMiddlewares.Select(p => p.WhenPublishSucceed(notification, handlerType, cancellationToken));
-            return task!;
-        }
-        catch (Exception ex)
-        {
-            _ = _publisherMiddlewares.Select(p => p.WhenPublishFailed(notification, handlerType, cancellationToken));
-            throw new PublishFailureException(handlerType, ex.Message);
         }
     }
 

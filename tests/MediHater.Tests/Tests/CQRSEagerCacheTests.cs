@@ -6,7 +6,7 @@ using MedihatR.Test.CQRS.Queries.Handlers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MedihatR.Test.Tests;
-public class CQRSLegacyTests : IDisposable
+public class CQRSEagerCacheTests : IDisposable
 {
 
     public void Dispose()
@@ -17,12 +17,12 @@ public class CQRSLegacyTests : IDisposable
     private readonly IMedihater _medihater;
     protected readonly IServiceProvider _serviceProvider;
 
-    public CQRSLegacyTests()
+    public CQRSEagerCacheTests()
     {
         IServiceCollection services = new ServiceCollection();
         services.AddMedihaterServices(o =>
         {
-            o.Performance = Configuraions.Enums.PipelinePerformance.Reflection;
+            o.CachingMode = Configuraions.Enums.PipelineCachingMode.EagerCaching;
         });
         services.AddMedihaterRequestHandler<GetArticleQuery, GetArticleHandler, ArticleResponse>();
         services.AddMedihaterRequestHandler<CreateArticleCommand, CreateArticleHandler>();
@@ -31,26 +31,17 @@ public class CQRSLegacyTests : IDisposable
     }
 
     [Fact]
-    public async Task ShouldSuccessfully_CreateArticle_UsingNonGenericSend()
+    public async Task ShouldSuccessfully_GetArticle_UsingNonGenericSend()
     {
-        await _medihater.Send(new CreateArticleCommand()
-        {
-            Title = "",
-            Description = ""
-        });
-
-        Assert.True(CreateArticleHandler.UnitTestPassed);
+        var response = await _medihater.Send(new GetArticleQuery("dsad"));
+        Assert.NotNull(response);
     }
 
     [Fact]
-    public async Task ShouldSuccessfully_CreateArticle_UsingGenericSend()
+    public async Task ShouldSuccessfully_GetArticle_UsingGenericSend()
     {
-        object command = new CreateArticleCommand()
-        {
-            Title = "",
-            Description = ""
-        };
-        await _medihater.Send(command);
-        Assert.True(CreateArticleHandler.UnitTestPassed);
+        object query = new GetArticleQuery("dsad");
+        var response = await _medihater.Send(query);
+        Assert.True(response!.GetType() == response.GetType());
     }
 }

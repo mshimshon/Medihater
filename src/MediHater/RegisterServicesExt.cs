@@ -1,5 +1,6 @@
 ﻿using MedihatR.Configuraions;
 using MedihatR.Engine.Implementations;
+using MedihatR.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MedihatR;
@@ -10,7 +11,8 @@ public static class RegisterServicesExt
     private static Type _requestHandlerVoidType = typeof(IRequestHandler<>);
     private static Type _requestHandlerType = typeof(IRequestHandler<,>);
     private static Type _notificationHandlerType = typeof(INotificationHandler<>);
-    public static MedihaterConfiguration Configuration { get; private set; } = new MedihaterConfiguration();
+    public static MedihaterConfiguration Configuration { get; } = new MedihaterConfiguration();
+    private static bool _mainServiceAdded;
     public static IServiceCollection AddMedihaterServices(this IServiceCollection services, Action<MedihaterConfiguration>? configure = default)
     {
         if (configure != default)
@@ -20,6 +22,7 @@ public static class RegisterServicesExt
             services.ScanAssemblies(Configuration.AssembliesScan.ToArray());
 
         services.AddScoped<IMedihater, Medihater>();
+        _mainServiceAdded = true;
         return services;
     }
 
@@ -44,6 +47,8 @@ public static class RegisterServicesExt
         where TRequest : IRequest<TResult>
         where THandler : IRequestHandler<TRequest, TResult>
     {
+
+        if (!_mainServiceAdded) throw new ServiceOutOfOrderException();
         Type impleType = typeof(THandler);
         Type requestType = typeof(TRequest);
         Type tResultType = typeof(TResult);
@@ -56,6 +61,7 @@ public static class RegisterServicesExt
         where TRequest : IRequest
         where THandler : IRequestHandler<TRequest>
     {
+        if (!_mainServiceAdded) throw new ServiceOutOfOrderException();
         Type impleType = typeof(THandler);
         Type requestType = typeof(TRequest);
         Type iface = _requestHandlerVoidType.MakeGenericType(requestType);
@@ -66,6 +72,7 @@ public static class RegisterServicesExt
         where TNotification : INotification
         where THandler : INotificationHandler<TNotification>
     {
+        if (!_mainServiceAdded) throw new ServiceOutOfOrderException();
         Type impleType = typeof(THandler);
         Type notificationType = typeof(TNotification);
         Type iface = _notificationHandlerType.MakeGenericType(notificationType);
@@ -80,7 +87,22 @@ public static class RegisterServicesExt
             !services.IsImplementationRegistered(implementation, iFace) &&
             iFace.GetGenericTypeDefinition() == _notificationHandlerType
             )
+        {
             services.AddTransient(iFace, implementation);
+
+            if (Configuration.CachingMode == Configuraions.Enums.PipelineCachingMode.EagerCaching)
+            {
+                var notificationType = iFace.GetGenericArguments()[0];
+
+
+                if (!notificationType.IsGenericType && typeof(INotification).IsAssignableFrom(notificationType))
+                {
+                    MediahaterCacher.GetNotificationHandlerOrCache(notificationType);
+                    MediahaterCacher.GetNotificationMethodOrCache(notificationType, implementation);
+                }
+            }
+        }
+
         return services;
     }
 
@@ -91,15 +113,40 @@ public static class RegisterServicesExt
         bool shouldRegister = (isGenericAndDefinitionRequestType || isNonGenericAndRequestType) &&
             !services.IsServiceInterfaceRegistered(iFace);
         if (shouldRegister)
+        {
             services.AddTransient(iFace, implementation);
+
+            if (Configuration.CachingMode == Configuraions.Enums.PipelineCachingMode.EagerCaching)
+            {
+                var requestType = iFace.GetGenericArguments()[0];
+                var iRequestGeneric = requestType
+                    .GetInterfaces()
+                    .FirstOrDefault(i =>
+                        i.IsGenericType &&
+                        i.GetGenericTypeDefinition() == typeof(IRequest<>));
+
+                if (iRequestGeneric != default)
+                {
+                    var responseType = iRequestGeneric.GetGenericArguments()[0];
+                    MediahaterCacher.GetHandlerOrCache(requestType, responseType);
+                    MediahaterCacher.GetMethodOrCache(requestType, responseType, implementation);
+                }
+                else if (typeof(IRequest).IsAssignableFrom(requestType))
+                {
+                    MediahaterCacher.GetVoidHandlerOrCache(requestType);
+                    MediahaterCacher.GetVoidMethodOrCache(requestType, implementation);
+                }
+            }
+        }
+
         return services;
     }
 
-    public static bool IsServiceInterfaceRegistered(this IServiceCollection services, Type iface)
+    private static bool IsServiceInterfaceRegistered(this IServiceCollection services, Type iface)
     {
         return services.Any(s => s.ServiceType == iface);
     }
-    public static bool IsImplementationRegistered(this IServiceCollection services, Type implementationType, Type ifaceType)
+    private static bool IsImplementationRegistered(this IServiceCollection services, Type implementationType, Type ifaceType)
     {
         return services.Any(s =>
             s.ImplementationType == implementationType &&

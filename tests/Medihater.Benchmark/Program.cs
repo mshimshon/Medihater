@@ -9,6 +9,8 @@ public class Program
 
     public static void Main(string[] args)
     {
-        BenchmarkRunner.Run<Benchmarks>();
+        BenchmarkRunner.Run<BenchmarkGeneric>();
+        BenchmarkRunner.Run<BenchmarkEager>();
+        BenchmarkRunner.Run<BenchmarkLazy>();
     }
 }
