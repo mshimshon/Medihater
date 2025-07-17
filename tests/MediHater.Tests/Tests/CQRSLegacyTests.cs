@@ -33,11 +33,12 @@ public class CQRSLegacyTests : IDisposable
     [Fact]
     public async Task ShouldSuccessfully_CreateArticle_UsingNonGenericSend()
     {
-        await _medihater.Send(new CreateArticleCommand()
+        var command = new CreateArticleCommand()
         {
             Title = "",
             Description = ""
-        });
+        };
+        await _medihater.Send(command);
 
         Assert.True(CreateArticleHandler.UnitTestPassed);
     }

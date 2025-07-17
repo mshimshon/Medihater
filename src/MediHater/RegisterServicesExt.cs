@@ -97,8 +97,7 @@ public static class RegisterServicesExt
 
                 if (!notificationType.IsGenericType && typeof(INotification).IsAssignableFrom(notificationType))
                 {
-                    MediahaterCacher.GetNotificationHandlerOrCache(notificationType);
-                    MediahaterCacher.GetNotificationMethodOrCache(notificationType, implementation);
+                    MediahaterCacher.GetNotificationMethodOrCache(notificationType);
                 }
             }
         }
@@ -128,13 +127,11 @@ public static class RegisterServicesExt
                 if (iRequestGeneric != default)
                 {
                     var responseType = iRequestGeneric.GetGenericArguments()[0];
-                    MediahaterCacher.GetHandlerOrCache(requestType, responseType);
-                    MediahaterCacher.GetMethodOrCache(requestType, responseType, implementation);
+                    MediahaterCacher.GetMethodOrCache(requestType, responseType);
                 }
                 else if (typeof(IRequest).IsAssignableFrom(requestType))
                 {
-                    MediahaterCacher.GetVoidHandlerOrCache(requestType);
-                    MediahaterCacher.GetVoidMethodOrCache(requestType, implementation);
+                    MediahaterCacher.GetVoidMethodOrCache(requestType);
                 }
             }
         }

@@ -12,5 +12,6 @@ public class Program
         BenchmarkRunner.Run<BenchmarkGeneric>();
         BenchmarkRunner.Run<BenchmarkEager>();
         BenchmarkRunner.Run<BenchmarkLazy>();
+
     }
 }
