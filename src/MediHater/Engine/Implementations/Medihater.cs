@@ -6,11 +6,11 @@ internal class Medihater : IMedihater
 #pragma warning restore CS0618 // Type or member is obsolete
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly IEnumerable<IPublisherMiddleware> _publisherMiddlewares;
+    private readonly IReadOnlyCollection<IPublisherMiddleware> _publisherMiddlewares;
     public Medihater(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
-        _publisherMiddlewares = _serviceProvider.GetServices<IPublisherMiddleware>();
+        _publisherMiddlewares = _serviceProvider.GetServices<IPublisherMiddleware>().ToList();
 
     }
 
@@ -47,6 +47,7 @@ internal class Medihater : IMedihater
         var requestType = request.GetType();
         var responseType = typeof(TResponse);
         var handle = MediahaterCacher.GetMethodOrCache(requestType, responseType);
+
         var response = await handle(_serviceProvider, request, cancellationToken);
         return (TResponse)response;
     }

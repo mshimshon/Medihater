@@ -1,5 +1,5 @@
 ﻿namespace MedihatR.Middlewares;
-public interface IRequestMiddleware
+internal interface IRequestMiddleware
 {
     Task BeforeHandler(object request, Type handlerType, CancellationToken cancellation = default);
     Task WhenHandlerCancelled(object request, Type handlerType, CancellationToken cancellation = default);
