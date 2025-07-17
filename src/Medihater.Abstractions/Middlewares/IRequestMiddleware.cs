@@ -3,7 +3,7 @@ public interface IRequestMiddleware
 {
     Task BeforeHandler(object request, Type handlerType, CancellationToken cancellation = default);
     Task WhenHandlerCancelled(object request, Type handlerType, CancellationToken cancellation = default);
-    Task WhenPublishFailed(object request, Type handlerType, CancellationToken cancellation = default);
-    Task WhenPublishSucceed(object request, Type handlerType, CancellationToken cancellation = default);
-    Task AfterPublish(object request, Type handlerType, CancellationToken cancellation = default);
+    Task WhenHandlerFailed(object request, Type handlerType, CancellationToken cancellation = default);
+    Task WhenHandlerSucceed(object request, Type handlerType, CancellationToken cancellation = default);
+    Task AfterHandler(object request, Type handlerType, CancellationToken cancellation = default);
 }
