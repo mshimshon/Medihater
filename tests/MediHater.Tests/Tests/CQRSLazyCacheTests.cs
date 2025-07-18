@@ -23,6 +23,8 @@ public class CQRSLazyCacheTests : IDisposable
         services.AddMedihaterServices(o =>
         {
             o.CachingMode = Configuraions.Enums.PipelineCachingMode.LazyCaching;
+            o.MiddlewareAwaitMode = Configuraions.Enums.PipelineMiddlewareWaitMode.NeverAwaitMiddlewares;
+            o.NotificationMiddleware = Configuraions.Enums.PipelineNotificationMiddleware.TriggerNotificationHandler_Then_AwaitForBoth;
         });
         services.AddMedihaterRequestHandler<GetArticleQuery, GetArticleHandler, ArticleResponse>();
         services.AddMedihaterRequestHandler<CreateArticleCommand, CreateArticleHandler>();

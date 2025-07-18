@@ -1,4 +1,10 @@
-﻿[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
+---
+slug: /
+title: What's MediHater
+tags: [blazor, MediHater, viewmodel-pattern, component-architecture, dependency-injection, scoped, transient, csharp, .net]
+sidebar_position: 1
+---
+[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
 [![NuGet Version](https://img.shields.io/nuget/v/medihater)](https://www.nuget.org/packages/medihater)
 [![](https://img.shields.io/nuget/dt/medihater?label=Downloads)](https://www.nuget.org/packages/medihater)
 
@@ -43,7 +49,6 @@ If you're already using **SwizzleV**, **StatePulse**, or **CoreMap**, this fits 
 
 ## 🧭 What's Next?
 - SenderMiddleware
-- Cancellation Pipeline Internal Support -> if cancel requested, stop pipeline flow.
 - Abstracted Cacher (Cacher could be replaced)
 - Improved Performance (Still some areas we could improve)
 - Implement IMedihatR -> Features a Request Prepper/Notification Prepper with cool features like [StatePulse.NET](https://github.com/mshimshon/StatePulse.Net).

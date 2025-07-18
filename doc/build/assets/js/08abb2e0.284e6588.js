@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkstatepulse_doc=self.webpackChunkstatepulse_doc||[]).push([[2345],{1511:e=>{e.exports=JSON.parse('{"tag":{"label":"viewmodel-pattern","permalink":"/tags/viewmodel-pattern","allTagsPath":"/tags","count":1,"items":[{"id":"What is MediHater","title":"What\'s MediHater","description":"What is MediHater?","permalink":"/"}],"unlisted":false}}')}}]);

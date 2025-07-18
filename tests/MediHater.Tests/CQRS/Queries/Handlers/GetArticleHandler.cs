@@ -6,7 +6,7 @@ internal class GetArticleHandler : IRequestHandler<GetArticleQuery, ArticleRespo
     public async Task<ArticleResponse> Handle(GetArticleQuery request, CancellationToken cancellationToken)
     {
         await Task.Delay(500);
-
+        if (request.Id == "Throw") throw new Exception("Here is an exception");
         return new ArticleResponse()
         {
             Description = "My Description",
