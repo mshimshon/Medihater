@@ -28,7 +28,7 @@ Follows a common-sense semantic versioning pattern:
   - **No breaking changes**
 	- 
 ### v0.9.5 (Initial Release)
-## Features
+#### Features
 - ✅ Request/Response handling with `IRequestHandler<TRequest, TResponse>`
 - ✅ Notification publishing with `INotificationHandler<TNotification>`
 - ✅ Middleware pipelines:

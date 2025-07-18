@@ -13,14 +13,19 @@
 		<Product>Medihater</Product>
 		<Description>A zero-bullshit mediator replacement — no weird licenses, no fluff, just what you need.</Description>
 		<Copyright>Maksim Shimshon © 2025</Copyright>
-		<PackageProjectUrl>https://github.com/mshimshon/MediatCore</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/mshimshon/MediatCore</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/mshimshon/Medihater</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/mshimshon/Medihater</RepositoryUrl>
 		<PackageReadmeFile>RELEASES.md</PackageReadmeFile>
-		<Version>0.9.0</Version>
+		<Version>0.9.1</Version>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageIcon>icon.png</PackageIcon>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<None Include="..\..\icon.png">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+		</None>
 		<None Include="..\..\LICENSE">
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
@@ -32,11 +37,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6" />
-	</ItemGroup>
-	<ItemGroup>
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
 			<_Parameter1>MedihatR.Test</_Parameter1>
 		</AssemblyAttribute>
 	</ItemGroup>
+
+	<Target Name="CopyNuPkg" AfterTargets="Pack" Condition="'$(Configuration)' == 'Release'">
+		<MakeDir Directories="..\..\..\..\nupkgs" />
+		<ItemGroup>
+			<PackageFiles Include="$(PackageOutputPath)$(PackageId).$(PackageVersion).nupkg" />
+		</ItemGroup>
+		<Copy SourceFiles="@(PackageFiles)" DestinationFolder="..\..\..\..\nupkgs" OverwriteReadOnlyFiles="true" SkipUnchangedFiles="false" />
+	</Target>
+
 </Project>

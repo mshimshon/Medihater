@@ -13,14 +13,19 @@
 	  <Product>Medihater</Product>
 	  <Description>A zero-bullshit mediator replacement — no weird licenses, no fluff, just what you need.</Description>
 	  <Copyright>Maksim Shimshon © 2025</Copyright>
-	  <PackageProjectUrl>https://github.com/mshimshon/MediatCore</PackageProjectUrl>
-	  <RepositoryUrl>https://github.com/mshimshon/MediatCore</RepositoryUrl>
+	  <PackageProjectUrl>https://github.com/mshimshon/Medihater</PackageProjectUrl>
+	  <RepositoryUrl>https://github.com/mshimshon/Medihater</RepositoryUrl>
 	  <PackageReadmeFile>RELEASES.md</PackageReadmeFile>
-	  <Version>0.9.0</Version>
+	  <Version>0.9.1</Version>
 	  <PackageLicenseFile>LICENSE</PackageLicenseFile>
+	  <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\..\icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Include="..\..\LICENSE">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
@@ -31,9 +36,16 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6" />
-  </ItemGroup>
+	<!-- For .NET 6 and .NET Standard, use version 7.x -->
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0' Or '$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'netstandard2.1'">
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+	</ItemGroup>
+
+	<!-- For .NET 8, use version 9.x -->
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6" />
+	</ItemGroup>
+	
 	<ItemGroup>
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
 			<_Parameter1>MedihatR.Test</_Parameter1>
@@ -42,4 +54,13 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\Medihater.Abstractions\Medihater.Abstractions.csproj" />
 	</ItemGroup>
+
+	<Target Name="CopyNuPkg" AfterTargets="Pack" Condition="'$(Configuration)' == 'Release'">
+		<MakeDir Directories="..\..\..\..\nupkgs" />
+		<ItemGroup>
+			<PackageFiles Include="$(PackageOutputPath)$(PackageId).$(PackageVersion).nupkg" />
+		</ItemGroup>
+		<Copy SourceFiles="@(PackageFiles)" DestinationFolder="..\..\..\..\nupkgs" OverwriteReadOnlyFiles="true" SkipUnchangedFiles="false" />
+	</Target>
+
 </Project>
