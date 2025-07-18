@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkstatepulse_doc=self.webpackChunkstatepulse_doc||[]).push([[358],{142:e=>{e.exports=JSON.parse('{"tag":{"label":"component-architecture","permalink":"/tags/component-architecture","allTagsPath":"/tags","count":1,"items":[{"id":"What is Medihater","title":"What\'s MediHater","description":"License: MIT","permalink":"/"}],"unlisted":false}}')}}]);

@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkstatepulse_doc=self.webpackChunkstatepulse_doc||[]).push([[724],{4239:t=>{t.exports=JSON.parse('{"tag":{"label":"component-patterns","permalink":"/tags/component-patterns","allTagsPath":"/tags","count":1,"items":[{"id":"How to Use","title":"How to Use","description":"\ud83d\ude80 Get Started","permalink":"/how-to-use"}],"unlisted":false}}')}}]);

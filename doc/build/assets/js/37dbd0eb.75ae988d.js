@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkstatepulse_doc=self.webpackChunkstatepulse_doc||[]).push([[3858],{9316:e=>{e.exports=JSON.parse('{"tag":{"label":"viewmodel","permalink":"/tags/viewmodel","allTagsPath":"/tags","count":1,"items":[{"id":"How to Use","title":"How to Use","description":"Convention Related to View Models","permalink":"/how-to-use"}],"unlisted":false}}')}}]);
