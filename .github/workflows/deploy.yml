@@ -77,6 +77,8 @@ jobs:
             10.0.x
 
 
+      - name: Wait for NuGet indexing
+        run: sleep 120
 
       - name: Restore dependencies
         run: |
