@@ -26,7 +26,16 @@ Follows a common-sense semantic versioning pattern:
   - Hotfixes or urgent bug fixes  
   - Safe to upgrade  
   - **No breaking changes**
-	- 
+
+
+### v1.0.0 (Stable Release)
+#### Compatibility
+- Added .NET 10 Support
+- Added .NET Standard 2.1 Support
+
+#### Minor Changes
+- ✅ Stable public release of Medihater
+
 ### v0.9.5 (Initial Release)
 #### Features
 - ✅ Request/Response handling with `IRequestHandler<TRequest, TResponse>`

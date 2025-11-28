@@ -1,0 +1,92 @@
+name: Deploy
+on:
+  workflow_run:
+    workflows: ["Build"]
+    types:
+      - completed
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  deploy-abstraction:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && 
+       github.event.workflow_run.conclusion == 'success' && 
+       github.event.workflow_run.event == 'push' &&
+       startsWith(github.event.workflow_run.head_branch, 'refs/tags/v'))
+    
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: | 
+            8.0.x
+            9.0.x
+            10.0.x
+    
+      - name: Restore dependencies
+        run: |
+          dotnet restore src/Medihater.Abstractions/Medihater.Abstractions.csproj
+      
+      - name: Build Medihater.Abstractions
+        run: dotnet build src/Medihater.Abstractions/Medihater.Abstractions.csproj -c Release --no-restore
+      
+      - name: Pack Medihater.Abstractions
+        run: dotnet pack src/Medihater.Abstractions/Medihater.Abstractions.csproj -c Release --no-build -o ./artifacts
+
+      - name: NuGet login (OIDC → temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Push Medihater.Abstractions
+        run: dotnet nuget push ./artifacts/Medihater.Abstractions.*.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      - name: Wait for NuGet indexing
+        run: sleep 120
+
+  deploy-core:
+    needs: deploy-abstraction
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && 
+       github.event.workflow_run.conclusion == 'success' && 
+       github.event.workflow_run.event == 'push' &&
+       startsWith(github.event.workflow_run.head_branch, 'refs/tags/v'))
+    
+    steps:
+
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: | 
+            8.0.x
+            9.0.x
+            10.0.x
+
+
+
+      - name: Restore dependencies
+        run: |
+          dotnet restore src/MediHater/MediHater.csproj
+      
+      - name: Build MediHater
+        run: dotnet build src/MediHater/MediHater.csproj -c Release --no-restore
+      
+      - name: Pack MediHater
+        run: dotnet pack src/MediHater/MediHater.csproj -c Release --no-build -o ./artifacts
+
+      - name: NuGet login (OIDC → temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Push MediHater
+        run: dotnet nuget push ./artifacts/MediHater.*.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json --skip-duplicate

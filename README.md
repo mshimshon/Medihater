@@ -1,6 +1,8 @@
 ﻿[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
 [![NuGet Version](https://img.shields.io/nuget/v/medihater)](https://www.nuget.org/packages/medihater)
 [![](https://img.shields.io/nuget/dt/medihater?label=Downloads)](https://www.nuget.org/packages/medihater)
+[![Build](https://github.com/mshimshon/medihater/actions/workflows/ci.yml/badge.svg)](https://github.com/mshimshon/medihater/actions/workflows/ci.yml)
+[![Deploy](https://github.com/mshimshon/medihater/actions/workflows/deploy.yml/badge.svg)](https://github.com/mshimshon/medihater/actions/workflows/deploy.yml)
 
 
 
