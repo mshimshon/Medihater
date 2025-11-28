@@ -53,7 +53,7 @@
 	
 	<!-- Reference Package at Pack Time -->
 	<ItemGroup Condition="'$(IsPackable)' == 'true'">
-		<PackageReference Include="StatePulse.Net.Abstractions" Version="*" />
+		<PackageReference Include="Medihater.Abstractions" Version="*" />
 	</ItemGroup>
 
 	<ItemGroup>
